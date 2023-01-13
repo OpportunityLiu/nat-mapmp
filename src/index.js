@@ -7,7 +7,7 @@ import {
   OP_CODE,
   initialized,
 } from "./constants.js";
-import { start } from "./natmap.js";
+import { start, stop } from "./natmap.js";
 
 const socket = createSocket("udp4", handler);
 socket.bind(SERVE_PORT);
@@ -30,13 +30,7 @@ async function handler(message, remote) {
   }
   switch (opCode) {
     case OP_CODE.PUBLIC_ADDRESS: {
-      try {
-        logger(`Request public ip`);
-        await sendPublicIp(remote);
-      } catch (ex) {
-        logger(ex);
-      }
-      return;
+      return await sendPublicIp(remote, logger);
     }
     case OP_CODE.NEW_UDP_PORT_MAPPING:
     case OP_CODE.NEW_TCP_PORT_MAPPING: {
@@ -50,12 +44,50 @@ async function handler(message, remote) {
             udpMode ? "udp" : "tcp"
           } port mapping: ${privatePort} => ${publicPort}, lifetime=${lifetime}`
         );
-        start(remote.address, privatePort, udpMode);
-        const buf = allocResponse(opCode, RESULT_CODE.SUCCESS, 16);
-        buf.writeUInt16BE(privatePort, 8);
-        buf.writeUInt16BE(publicPort, 10);
-        buf.writeUInt32BE(lifetime, 12);
-        send(remote, buf);
+        if (lifetime) {
+          logger(
+            `Request new ${
+              udpMode ? "udp" : "tcp"
+            } port mapping: ${privatePort} => ${publicPort}, lifetime=${lifetime}`
+          );
+          const gotPublicPort = await start(
+            remote.address,
+            privatePort,
+            udpMode
+          );
+          const buf = allocResponse(opCode, RESULT_CODE.SUCCESS, 16);
+          buf.writeUInt16BE(privatePort, 8);
+          buf.writeUInt16BE(gotPublicPort, 10);
+          buf.writeUInt32BE(lifetime, 12);
+          logger(
+            `Added new mapping ${privatePort} => ${gotPublicPort}, lifetime=${lifetime}`
+          );
+          setTimeout(() => {
+            if (stop(remote.address, privatePort, udpMode)) {
+              logger(
+                `Removed mapping ${privatePort} => ${gotPublicPort} due to timeout`
+              );
+            }
+          }, lifetime * 1000);
+          send(remote, buf);
+        } else {
+          logger(
+            `Request remove ${
+              udpMode ? "udp" : "tcp"
+            } port mapping: ${privatePort} => ${publicPort}`
+          );
+          const removed = stop(remote.address, privatePort, udpMode);
+          if (removed) {
+            logger(`Removed mapping`);
+          } else {
+            logger(`Mapping not found`);
+          }
+          const buf = allocResponse(opCode, RESULT_CODE.SUCCESS, 16);
+          buf.writeUInt16BE(privatePort, 8);
+          buf.writeUInt16BE(publicPort, 10);
+          buf.writeUInt32BE(lifetime, 12);
+          send(remote, buf);
+        }
       } catch (ex) {
         console.error(ex);
         send(remote, allocResponse(opCode, RESULT_CODE.NETWORK_FAILURE, 16));
@@ -83,8 +115,9 @@ function send(remote, payload) {
   socket.send(payload, remote.port, remote.address);
 }
 
-async function sendPublicIp(remote) {
+async function sendPublicIp(remote, logger) {
   try {
+    logger(`Request public ip`);
     const buf = allocResponse(OP_CODE.PUBLIC_ADDRESS, RESULT_CODE.SUCCESS, 12);
     const ip = await getPublicIp();
     buf[8] = ip[0];
@@ -92,11 +125,12 @@ async function sendPublicIp(remote) {
     buf[10] = ip[2];
     buf[11] = ip[3];
     send(remote, buf);
+    logger(`Respond with ${ip.join(".")}`);
   } catch (ex) {
     send(
       remote,
       allocResponse(OP_CODE.PUBLIC_ADDRESS, RESULT_CODE.NETWORK_FAILURE, 12)
     );
-    throw ex;
+    logger(ex);
   }
 }
