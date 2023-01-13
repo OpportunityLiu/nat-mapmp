@@ -23,9 +23,9 @@ export function start(sourceAddr, sourcePort, udpMode) {
   holder.push(info);
   return new Promise((resolve) => {
     natmap.stdout.on("data", (ch) => {
-      const [publicAddr, publicPort, ip4p, privatePort, protocol] =
+      const [publicAddr, publicPort, ip4p, bindPort, protocol] =
         String(ch).split(" ");
-      if (protocol !== (udpMode ? "udp" : "tcp")) return;
+      if (protocol.trim() !== (udpMode ? "udp" : "tcp")) return;
       const fields = publicAddr.split(".").map((s) => Number.parseInt(s));
       if (fields.length !== 4) return;
       info.publicAddr = publicAddr;
