@@ -1,5 +1,5 @@
 import { spawn } from "node:child_process";
-import { updatePublicIp } from "./public-ip";
+import { updatePublicIp } from "./public-ip.js";
 
 const EXEC = "natmap";
 const STUN_SERVER = "stun.stunprotocol.org";
