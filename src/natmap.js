@@ -1,16 +1,17 @@
 import { spawn } from "node:child_process";
 
 export function start(sourceIp, sourcePort, udpMode) {
-  let process;
+  let natmap;
   if (udpMode) {
-    process = spawn(
+    natmap = spawn(
       `natmap -u -s stun.stunprotocol.org -b 0 -t ${sourceIp} -p ${sourcePort} -e echo`,
-      { stdio: "inherit" }
+      { stdio: "pipe" }
     );
   } else {
-    process = spawn(
+    natmap = spawn(
       `natmap -s stun.stunprotocol.org -h qq.com -b 0 -t ${sourceIp} -p ${sourcePort} -e echo`,
-      { stdio: "inherit" }
+      { stdio: "pipe" }
     );
   }
+  natmap.stdout.on("data", (ch) => console.log(ch));
 }
