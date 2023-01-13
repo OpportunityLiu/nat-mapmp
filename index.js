@@ -24,14 +24,19 @@ const STARTED_AT = Date.now();
 const socket = createSocket("udp4", async (message, remote) => {
   const version = message[0];
   const opCode = message[1];
+  const logger = console.log.bind(
+    console,
+    `[${remote.address}:${remote.port}]`
+  );
   if (version !== VERSION) {
-    console.log(`Unsupported pmp version ${version}`);
+    logger(`Unsupported pmp version ${version}`);
     send(remote, allocResponse(opCode, RESULT_CODE.UNSUPPORTED_VERSION));
     return;
   }
   switch (opCode) {
     case OP_CODE.PUBLIC_ADDRESS: {
       try {
+        logger(`Request public ip`);
         const buf = allocResponse(opCode, RESULT_CODE.SUCCESS, 12);
         const ip = await getPublicIp();
         buf[8] = ip[0];
@@ -40,7 +45,7 @@ const socket = createSocket("udp4", async (message, remote) => {
         buf[11] = ip[3];
         send(remote, buf);
       } catch (ex) {
-        console.error(ex);
+        logger(ex);
         send(remote, allocResponse(opCode, RESULT_CODE.NETWORK_FAILURE, 12));
       }
       return;
@@ -51,6 +56,11 @@ const socket = createSocket("udp4", async (message, remote) => {
         const privatePort = message.readUInt16BE(4);
         const publicPort = message.readUInt16BE(6);
         const lifetime = message.readUint32BE(8);
+        logger(
+          `Request new ${
+            opCode === OP_CODE.NEW_UDP_PORT_MAPPING ? "udp" : "tcp"
+          } port mapping: ${privatePort} => ${publicPort}, lifetime=${lifetime}`
+        );
         const buf = allocResponse(opCode, RESULT_CODE.SUCCESS, 16);
         buf.writeUInt16BE(privatePort, 8);
         buf.writeUInt16BE(publicPort, 10);
