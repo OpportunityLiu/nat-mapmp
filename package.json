@@ -4,9 +4,22 @@
   "description": "A NAT-PMP implementation with natmap.",
   "author": "OpportunityLiu",
   "type": "module",
-  "main": "src/index.js",
+  "main": "dist/index.js",
   "license": "MIT",
-  "dependencies": {
-    "node-fetch": "^3.3.0"
+  "scripts": {
+    "build": "rollup -c"
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "@rollup/plugin-commonjs": "^24.0.0",
+    "@rollup/plugin-node-resolve": "^15.0.1",
+    "@rollup/plugin-typescript": "^11.0.0",
+    "@types/node": "^18.11.18",
+    "commander": "^10.0.0",
+    "node-fetch": "^3.3.0",
+    "rollup": "^3.10.0",
+    "stun": "^2.1.0",
+    "tslib": "^2.4.1",
+    "typescript": "^4.9.4"
   }
 }
