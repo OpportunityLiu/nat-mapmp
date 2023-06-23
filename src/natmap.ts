@@ -57,7 +57,10 @@ export function start(
     config.holdServer
   } -b ${port} -t ${sourceAddr} -p ${sourcePort} ${udpMode ? "-u" : ""}`;
   console.debug(`Starting ${command}`);
-  const service = spawn(command, { shell: true });
+  const service = spawn(command, {
+    shell: true,
+    stdio: ["ignore", "pipe", "inherit"],
+  });
   const info: Mapping = {
     service,
     sourceAddr,
