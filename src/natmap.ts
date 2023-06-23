@@ -55,7 +55,7 @@ export function start(
   const port = getPort(udpMode);
   const command = `${config.natmapExec} -s ${config.stunServer} -h ${
     config.holdServer
-  } -b ${port} -t ${sourceAddr} -p ${sourcePort} ${udpMode ? "-u" : ""}`;
+  } -b ${port} -t ${sourceAddr} -p ${sourcePort} ${udpMode ? "-u" : ""} -k 5`;
   console.debug(`Starting ${command}`);
   const service = spawn(command, {
     shell: true,
