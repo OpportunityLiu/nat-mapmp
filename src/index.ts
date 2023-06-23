@@ -3,15 +3,19 @@ import { program } from "commander";
 import { config } from "./config.js";
 
 program
-  .option("-h, --hold <hold-url>", "set url of tcp holder", "qq.com")
+  .option("-h, --hold <hold-url>", "set url of tcp holder", config.holdServer)
+  .option("-s, --stun <stun-url>", "set url of stun server", config.stunServer)
   .option(
-    "-s, --stun <stun-url>",
-    "set url of stun server",
-    "stun.stunprotocol.org"
+    "-p, --port <port>",
+    "NAT-PMP serve port",
+    config.listenPort.toString()
   )
-  .option("-p, --port <port>", "NAT-PMP serve port", "5351")
-  .option("-b, --bind <port-range>", "Nat map port range", "9000-9999")
-  .option("--exec <path>", "path to natmap executable", "natmap")
+  .option(
+    "-b, --bind <port-range>",
+    "Nat map port range",
+    config.bindPort.join("-")
+  )
+  .option("--exec <path>", "path to natmap executable", config.natmapExec)
   .action(async () => {
     const opts = program.opts<{
       hold: string;
