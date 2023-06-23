@@ -10,5 +10,5 @@ export default defineConfig({
     sourcemap: true,
     format: "esm",
   },
-  plugins: [typescript(), nodeResolve({ preferBuiltins: false }), commonjs()],
+  plugins: [typescript(), nodeResolve({ preferBuiltins: true }), commonjs()],
 });

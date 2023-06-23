@@ -9,17 +9,16 @@
   "scripts": {
     "build": "rollup -c"
   },
-  "dependencies": {},
   "devDependencies": {
-    "@rollup/plugin-commonjs": "^24.0.0",
-    "@rollup/plugin-node-resolve": "^15.0.1",
-    "@rollup/plugin-typescript": "^11.0.0",
-    "@types/node": "^18.11.18",
-    "commander": "^10.0.0",
-    "node-fetch": "^3.3.0",
-    "rollup": "^3.10.0",
+    "@rollup/plugin-commonjs": "^25.0.2",
+    "@rollup/plugin-node-resolve": "^15.1.0",
+    "@rollup/plugin-typescript": "^11.1.1",
+    "@types/node": "^20.3.1",
+    "commander": "^11.0.0",
+    "node-fetch": "^3.3.1",
+    "rollup": "^3.25.1",
     "stun": "^2.1.0",
-    "tslib": "^2.4.1",
-    "typescript": "^4.9.4"
+    "tslib": "^2.5.3",
+    "typescript": "^5.1.3"
   }
 }
