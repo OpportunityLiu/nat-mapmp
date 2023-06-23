@@ -43,6 +43,7 @@ class Handler {
     if (this.version !== VERSION) {
       this.send(this.allocResponse(8, ResultCode.UNSUPPORTED_VERSION));
       this.logger(`Unsupported pmp version ${this.version}`);
+      console.debug(this.message.toString("hex"));
       return;
     }
     switch (this.opCode) {
@@ -56,6 +57,7 @@ class Handler {
       default: {
         this.send(this.allocResponse(8, ResultCode.UNSUPPORTED_OPCODE));
         this.logger(`Unsupported pmp op code ${this.opCode}`);
+        console.debug(this.message.toString("hex"));
         return;
       }
     }
