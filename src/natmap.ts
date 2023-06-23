@@ -2,8 +2,6 @@ import { ChildProcess, spawn } from "node:child_process";
 import { updatePublicIp } from "./public-ip.js";
 import { config } from "./config.js";
 
-const PORT_START = 9000;
-
 const holder: Mapping[] = [];
 
 interface Mapping {
