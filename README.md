@@ -1,6 +1,6 @@
 # nat-mapmp
 
-A NAT-PMP implementation with natmap.
+A NAT-PMP implementation with [natmap](https://github.com/heiher/natmap).
 
 ## Usage
 
