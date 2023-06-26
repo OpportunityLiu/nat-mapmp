@@ -51,4 +51,4 @@ A NAT-PMP implementation with [natmap](https://github.com/heiher/natmap).
 ## References
 
 - [NAT-PMP](http://tools.ietf.org/html/rfc6886)
-- [PCP](http://tools.ietf.org/html/rfc6887)
+- [PCP](http://tools.ietf.org/html/rfc6887) (WIP)
