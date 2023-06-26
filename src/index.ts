@@ -15,7 +15,7 @@ program
     config.stunServer
   )
   .option(
-    "-H, --host <address>",
+    "    --host <address>",
     "NAT-PMP serve host address",
     (v) => {
       assert(
@@ -70,7 +70,6 @@ program
   .action(async () => {
     const opts = program.opts<typeof config>();
     Object.assign(config, opts);
-    console.log(config);
     await createServer();
   });
 
