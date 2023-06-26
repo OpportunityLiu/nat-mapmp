@@ -9,8 +9,9 @@ export async function createServer(): Promise<Socket> {
   socket.on("message", (msg, rinfo) =>
     new Handler(socket, startTime, msg, rinfo).handle()
   );
+  socket.on("error", console.error.bind(console));
   await new Promise<void>((res) => {
-    socket.bind(config.listenPort, undefined, res);
+    socket.bind(config.port, config.host, res);
   });
   const startTime = Date.now();
   const { address, port } = socket.address();

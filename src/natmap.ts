@@ -51,10 +51,12 @@ export function start(
   }
 
   const port = getPort(udpMode);
-  const command = `${config.natmapExec} -s ${config.stunServer} -h ${
-    config.holdServer
-  } -b ${port} -t ${sourceAddr} -p ${sourcePort} ${udpMode ? "-u" : ""} -k 5`;
-  console.debug(`Starting ${command}`);
+  const commonArgs = `-s ${config.stunServer} -h ${config.holdServer} -b ${port} -t ${sourceAddr} -p ${sourcePort}`;
+  const protocolArgs = udpMode ? config.udpArgs : config.tcpArgs;
+  const command = `${config.exec} ${commonArgs} ${protocolArgs}`;
+
+  console.debug(`> ${command}`);
+
   const service = spawn(command, {
     shell: true,
     stdio: ["ignore", "pipe", "inherit"],
