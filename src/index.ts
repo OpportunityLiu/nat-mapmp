@@ -2,16 +2,19 @@ import assert from "node:assert";
 import { InvalidArgumentError, program } from "commander";
 import { createServer } from "./server.js";
 import { config } from "./config.js";
+import { version } from "../package.json" assert { type: "json" };
+
+program.version(version);
 
 program
   .option(
     "-h, --hold-server <hold-url>",
-    "Set url of tcp holder",
+    "set url of tcp holder",
     config.holdServer
   )
   .option(
     "-s, --stun-server <stun-url>",
-    "Set url of stun server",
+    "set url of stun server",
     config.stunServer
   )
   .option(
@@ -38,7 +41,7 @@ program
   )
   .option(
     "-b, --bind <port-range>",
-    "Ports used for natmap binding, you must allow inbound connections to these ports",
+    "ports used for natmap binding, you must allow inbound connections to these ports",
     (v) => {
       const r = v.split("-").map((p) => Number.parseInt(p)) as [number, number];
       assert(r.length === 2, new InvalidArgumentError("Invalid port range"));
@@ -56,15 +59,15 @@ program
     },
     config.bindPort
   )
-  .option("--exec <path>", "Path to natmap executable", config.exec)
+  .option("--exec <path>", "path to natmap executable", config.exec)
   .option(
     "--tcp-args <args>",
-    "Additional args forwarded to natmap when establishing TCP port mappings",
+    "additional args forwarded to natmap when establishing TCP port mappings",
     config.tcpArgs
   )
   .option(
     "--udp-args <args>",
-    "Additional args forwarded to natmap when establishing UDP port mappings",
+    "additional args forwarded to natmap when establishing UDP port mappings",
     config.udpArgs
   )
   .action(async () => {
