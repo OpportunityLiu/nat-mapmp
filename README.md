@@ -4,13 +4,29 @@ A NAT-PMP implementation with [natmap](https://github.com/heiher/natmap).
 
 ## Usage
 
-1. Install nodeJS.
+1. Download [nat-mapmp](../../releases). Add execute permission to it.
 
    ```bash
-   opkg update && opkg install nodejs
+   # Download nat-mapmp
+   curl -Lo nat-mapmp.mjs $(
+      curl -s https://api.github.com/repos/opportunityliu/nat-mapmp/releases/latest \
+         | grep "browser_download_url.*mjs\"" \
+         | cut -d : -f 2,3 \
+         | tr -d \" )
+
+   # Add execute permission
+   chmod +x ./nat-mapmp.mjs
    ```
 
-2. Download [nat-mapmp](../../releases).
+2. Install nodeJS. Make sure node version is >= 16.0.0.
+
+   ```bash
+   # Install nodejs on OpenWrt
+   opkg update && opkg install nodejs
+
+   # Check node version
+   node --version
+   ```
 
 3. Allow inbound connections to natmap binding ports. Default ports are `9000-9999`. You can change it by setting `--bind` option.
 
@@ -21,7 +37,6 @@ A NAT-PMP implementation with [natmap](https://github.com/heiher/natmap).
 5. Run `nat-mapmp` with `nodejs`.
 
    ```bash
-   chmod +x ./nat-mapmp.mjs
    ./nat-mapmp.mjs
    ```
 
