@@ -4,7 +4,7 @@
   "description": "A NAT-PMP implementation with natmap.",
   "author": "OpportunityLiu",
   "type": "module",
-  "main": "dist/index.js",
+  "main": "dist/nat-mapmp.mjs",
   "license": "MIT",
   "scripts": {
     "build": "rollup -c"

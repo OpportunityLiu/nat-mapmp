@@ -12,7 +12,7 @@ program
   )
   .option(
     "-b, --bind <port-range>",
-    "Nat map port range",
+    "Nat map port range, you must allow inbound connections to these ports",
     config.bindPort.join("-")
   )
   .option("--exec <path>", "path to natmap executable", config.natmapExec)

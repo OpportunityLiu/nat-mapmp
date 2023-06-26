@@ -6,7 +6,8 @@ import commonjs from "@rollup/plugin-commonjs";
 export default defineConfig({
   input: "./src/index.ts",
   output: {
-    dir: "./dist",
+    file: "./dist/nat-mapmp.mjs",
+    banner: "#!/usr/bin/env node\n",
     sourcemap: true,
     format: "esm",
   },
