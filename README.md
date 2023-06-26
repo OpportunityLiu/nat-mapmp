@@ -12,7 +12,7 @@ A NAT-PMP implementation with natmap.
 
 2. Install [natmap](https://github.com/heiher/natmap). Make sure `natmap` is in your `$PATH`.
 
-3. Download [nat-mapmp](./releases).
+3. Download [nat-mapmp](../../releases).
 
 4. Allow inbound connections to natmap binding ports. Default ports are `9000-9999`. You can change it by setting `--bind` option.
 
