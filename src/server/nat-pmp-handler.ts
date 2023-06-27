@@ -111,12 +111,7 @@ export class NatPmpHandler extends Handler {
         this.logger.info(
           `Request new ${Protocol[protocol]} port mapping: ${this.remote.address}:${sourcePort} => ${externalPort}, lifetime ${lifetime}s`
         );
-        const info = start(
-          this.remote.address,
-          sourcePort,
-          protocol,
-          lifetime
-        );
+        const info = start(this.remote.address, sourcePort, protocol, lifetime);
         await info.ready;
         const buf = this.allocResponse(16);
         buf.writeUInt16BE(sourcePort, 8);

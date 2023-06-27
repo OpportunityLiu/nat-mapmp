@@ -3,11 +3,15 @@ export const config = {
   port: 5351,
   exec: "natmap",
 
-  bindPort: Object.defineProperty([9000, 9999] as readonly [number, number], "toJSON", {
-    value() {
-      return `${this[0]}-${this[1]}`;
-    },
-  }),
+  bindPort: Object.defineProperty(
+    [9000, 9999] as readonly [number, number],
+    "toJSON",
+    {
+      value() {
+        return `${this[0]}-${this[1]}`;
+      },
+    }
+  ),
   stunServer: "stunserver.stunprotocol.org",
   holdServer: "qq.com",
 

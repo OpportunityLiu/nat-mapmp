@@ -8,7 +8,8 @@
   "license": "MIT",
   "scripts": {
     "build": "rollup -c",
-    "watch": "rollup -c -w"
+    "watch": "rollup -c -w",
+    "format": "prettier -w ."
   },
   "devDependencies": {
     "@rollup/plugin-commonjs": "^25.0.2",
@@ -20,6 +21,7 @@
     "node-fetch": "^3.3.1",
     "pino": "^8.14.1",
     "pino-pretty": "^10.0.0",
+    "prettier": "^2.8.8",
     "rollup": "^3.25.1",
     "rollup-plugin-esbuild": "^5.0.0",
     "tslib": "^2.5.3",
