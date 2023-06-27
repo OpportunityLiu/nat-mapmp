@@ -1,6 +1,6 @@
 {
   "name": "nat-mapmp",
-  "version": "0.1.4",
+  "version": "0.2.0",
   "description": "A NAT-PMP implementation with natmap.",
   "author": "OpportunityLiu",
   "type": "module",
