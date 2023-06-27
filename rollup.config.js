@@ -18,7 +18,7 @@ export default defineConfig((args) => {
     },
     plugins: [
       typescript(),
-      nodeResolve({ preferBuiltins: false }),
+      nodeResolve({ preferBuiltins: true }),
       commonjs(),
       json({ preferConst: true }),
       esbuild({

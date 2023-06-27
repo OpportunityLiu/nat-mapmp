@@ -18,9 +18,10 @@
     "@types/node": "^20.3.1",
     "commander": "^11.0.0",
     "node-fetch": "^3.3.1",
+    "pino": "^8.14.1",
+    "pino-pretty": "^10.0.0",
     "rollup": "^3.25.1",
     "rollup-plugin-esbuild": "^5.0.0",
-    "stun": "^2.1.0",
     "tslib": "^2.5.3",
     "typescript": "^5.1.3"
   }

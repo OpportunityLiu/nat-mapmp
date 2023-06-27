@@ -1,8 +1,8 @@
 import assert from "node:assert";
 import { InvalidArgumentError, program } from "commander";
-import { createServer } from "./server.js";
 import { config } from "./config.js";
 import { version } from "../package.json" assert { type: "json" };
+import { Server } from "./server/index.js";
 
 program.version(version);
 
@@ -73,7 +73,9 @@ program
   .action(async () => {
     const opts = program.opts<typeof config>();
     Object.assign(config, opts);
-    await createServer();
+
+    const server = new Server();
+    await server.listen();
   });
 
 program.parseAsync();
