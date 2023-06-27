@@ -22,7 +22,7 @@ A NAT-PMP implementation with [natmap](https://github.com/heiher/natmap).
 
    ```bash
    # Install nodejs on OpenWrt
-   opkg update && opkg install nodejs
+   opkg update && opkg install node
 
    # Check node version
    node --version
