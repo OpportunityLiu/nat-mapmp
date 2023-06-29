@@ -1,4 +1,4 @@
-import { start, stop } from "../natmap.js";
+import { Mapping } from "../natmap.js";
 import { publicIp } from "../ip.js";
 import { Handler } from "./handler-base.js";
 import { Protocol } from "../constants.js";
@@ -21,7 +21,7 @@ enum ResultCode {
 }
 
 function allocResponse(
-  startTime: number,
+  epochTime: number,
   opCode: OpCode,
   resultCode = ResultCode.SUCCESS,
   payloadSize = 8
@@ -30,16 +30,16 @@ function allocResponse(
   buf[0] = 0;
   buf[1] = opCode + 128;
   buf.writeUInt16BE(resultCode, 2);
-  buf.writeUInt32BE(Math.floor((Date.now() - startTime) / 1000), 4);
+  buf.writeUInt32BE(epochTime, 4);
   return buf;
 }
 
 export function allocPublicAddressResponse(
-  startTime: number,
+  epochTime: number,
   ip: readonly number[]
 ): Buffer {
   const buf = allocResponse(
-    startTime,
+    epochTime,
     OpCode.PUBLIC_ADDRESS,
     ResultCode.SUCCESS,
     12
@@ -89,7 +89,7 @@ export class NatPmpHandler extends Handler {
     try {
       this.logger.info(`Request public ip`);
       const ip = publicIp.ip;
-      const buf = allocPublicAddressResponse(this.server.startTime, ip);
+      const buf = allocPublicAddressResponse(this.server.epochTime, ip);
       this.send(buf);
       this.logger.info(`Respond with ${ip.join(".")}`);
     } catch (ex) {
@@ -107,36 +107,32 @@ export class NatPmpHandler extends Handler {
         this.opCode === OpCode.NEW_UDP_PORT_MAPPING
           ? Protocol.UDP
           : Protocol.TCP;
+      const key = { sourceAddr: this.remote.address, sourcePort, protocol };
       if (lifetime) {
         this.logger.info(
           `Request new ${Protocol[protocol]} port mapping: ${this.remote.address}:${sourcePort} => ${externalPort}, lifetime ${lifetime}s`
         );
-        const info = start(this.remote.address, sourcePort, protocol, lifetime);
-        await info.ready;
-        const buf = this.allocResponse(16);
-        buf.writeUInt16BE(sourcePort, 8);
-        buf.writeUInt16BE(info.publicPort, 10);
-        buf.writeUInt32BE(lifetime, 12);
-        this.logger.info(
-          `Added new mapping ${info.sourceAddr}:${info.sourcePort} => ${info.publicPort}`
-        );
-        this.send(buf);
+        const info = Mapping.start(key, lifetime);
+        info.on("change", () => {
+          if (!info.publicPort) return;
+          const buf = this.allocResponse(16);
+          buf.writeUInt16BE(sourcePort, 8);
+          buf.writeUInt16BE(info.publicPort, 10);
+          buf.writeUInt32BE(info.lifetime, 12);
+          this.send(buf);
+        });
       } else {
         this.logger.info(
           `Request remove ${Protocol[protocol]} port mapping: ${this.remote.address}:${sourcePort} => ${externalPort}`
         );
-        const info = stop(this.remote.address, sourcePort, protocol);
-        if (info) {
-          this.logger.info(
-            `Removed mapping ${info.sourceAddr}:${info.sourcePort} => ${info.publicPort}`
-          );
-        } else {
+        const info = Mapping.stop(key, "nat-pmp client request");
+        if (!info) {
           this.logger.warn(`Mapping not found`);
         }
         const buf = this.allocResponse(16);
         buf.writeUInt16BE(sourcePort, 8);
-        buf.writeUInt16BE(externalPort, 10);
-        buf.writeUInt32BE(lifetime, 12);
+        buf.writeUInt16BE(0, 10);
+        buf.writeUInt32BE(0, 12);
         this.send(buf);
       }
     } catch (ex) {
@@ -151,7 +147,7 @@ export class NatPmpHandler extends Handler {
     opCode = this.opCode
   ): Buffer {
     return allocResponse(
-      this.server.startTime,
+      this.server.epochTime,
       opCode,
       resultCode,
       payloadSize

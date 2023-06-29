@@ -1,6 +1,6 @@
 import { Protocol } from "../constants.js";
-import { start, stop } from "../natmap.js";
-import { publicIp, type Ip, isEqualIp } from "../ip.js";
+import { Mapping } from "../natmap.js";
+import { type Ip, isEqualIp } from "../ip.js";
 import { Handler } from "./handler-base.js";
 
 const VERSION = 2;
@@ -128,41 +128,23 @@ export class PcpHandler extends Handler {
     }
 
     try {
+      const key = { sourceAddr: this.remote.address, sourcePort, protocol };
       const resp = Buffer.copyBytesFrom(this.message);
       // resp[0] // version
       resp[1] += 128;
       resp[2] = 0; // reserved
       resp[3] = ResultCode.SUCCESS;
-      // resp[4-7] // lifetime
-      resp.writeUInt32BE((Date.now() - this.server.startTime) / 1000, 8); // epoch time
       resp.fill(0, 12, 24); // reserved
 
       if (lifetime) {
         this.logger.info(
           `Request new ${Protocol[protocol]} port mapping: ${this.remote.address}:${sourcePort} => ${externalPort}, lifetime ${lifetime}s`
         );
-        const info = start(this.remote.address, sourcePort, protocol, lifetime);
-        await info.ready;
-        resp.writeUInt16BE(info.publicPort, 42);
-        const publicIp = info.publicAddr
-          .split(".")
-          .map(Number) as unknown as Ip;
-        resp[56] = publicIp[0];
-        resp[57] = publicIp[1];
-        resp[58] = publicIp[2];
-        resp[59] = publicIp[3];
-        this.logger.info(
-          `Added new mapping ${info.sourceAddr}:${info.sourcePort} => ${info.publicPort}`
-        );
-      } else {
-        this.logger.info(
-          `Request remove ${Protocol[protocol]} port mapping: ${this.remote.address}:${sourcePort} => ${externalPort}`
-        );
-        const info = stop(this.remote.address, sourcePort, protocol);
-        if (info) {
-          this.logger.info(
-            `Removed mapping ${info.sourceAddr}:${info.sourcePort} => ${info.publicPort}`
-          );
+        const info = Mapping.start(key, lifetime);
+        info.on("change", () => {
+          if (!info.publicPort || !info.publicAddr) return;
+          resp.writeUint32BE(info.lifetime, 4);
+          resp.writeUInt32BE(this.server.epochTime, 8);
           resp.writeUInt16BE(info.publicPort, 42);
           const publicIp = info.publicAddr
             .split(".")
@@ -171,11 +153,28 @@ export class PcpHandler extends Handler {
           resp[57] = publicIp[1];
           resp[58] = publicIp[2];
           resp[59] = publicIp[3];
-        } else {
+          this.send(resp);
+          this.logger.info(
+            `Response new ${Protocol[protocol]} port mapping: ${this.remote.address}:${sourcePort} => ${info.publicPort}`
+          );
+        });
+      } else {
+        this.logger.info(
+          `Request remove ${Protocol[protocol]} port mapping: ${this.remote.address}:${sourcePort} => ${externalPort}`
+        );
+        const info = Mapping.stop(key, "pcp client request");
+        if (!info) {
           this.logger.warn(`Mapping not found`);
         }
+        resp.writeUint32BE(0, 4);
+        resp.writeUInt32BE(this.server.epochTime, 8);
+        resp.writeUInt16BE(0, 42);
+        resp[56] = 0;
+        resp[57] = 0;
+        resp[58] = 0;
+        resp[59] = 0;
+        this.send(resp);
       }
-      this.send(resp);
     } catch (ex) {
       this.logger.warn(ex);
       this.sendError(ResultCode.NETWORK_FAILURE, false);
@@ -197,7 +196,7 @@ export class PcpHandler extends Handler {
     resp[1] = this.opCode + 128;
     resp[3] = resultCode;
     resp.writeUInt32BE(longLifetime ? 1800 : 30, 4);
-    resp.writeUInt32BE((Date.now() - this.server.startTime) / 1000, 8);
+    resp.writeUInt32BE(this.server.epochTime, 8);
     resp.fill(0, 12, 24); // reserved
 
     this.send(resp);

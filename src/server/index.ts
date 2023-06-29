@@ -15,12 +15,16 @@ const l = logger.child({}, { msgPrefix: "[server] " });
 export class Server {
   constructor() {}
   readonly socket = createSocket("udp4", this.onMessage.bind(this));
-
-  startTime = 0;
+  /** Seconds since start time */
+  get epochTime(): number {
+    return Math.floor((Date.now() - this.startTime) / 1000);
+  }
+  private startTime = 0;
   listen(): Promise<void> {
     if (this.startTime) {
       return Promise.resolve();
     }
+    this.startTime = Date.now();
     return new Promise<void>((res, rej) => {
       this.socket.on("error", rej);
       this.socket.bind(config.port, config.host, () => {
@@ -39,10 +43,9 @@ export class Server {
 
   // https://datatracker.ietf.org/doc/html/rfc6886#section-3.2.1
   protected async announceAddressChanges(): Promise<void> {
-    this.startTime = Date.now();
     let delay = 250;
     for (let index = 0; index < 10; index++) {
-      const buf = allocPublicAddressResponse(this.startTime, publicIp.ip);
+      const buf = allocPublicAddressResponse(this.epochTime, publicIp.ip);
       l.trace(
         `Announcing address changes [${String(index + 1).padStart(
           2

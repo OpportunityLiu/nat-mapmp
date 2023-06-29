@@ -2,5 +2,6 @@
   "[typescript]": {
     "editor.tabSize": 2
   },
-  "cSpell.words": ["natmap"]
+  "cSpell.words": ["natmap"],
+  "typescript.tsdk": "node_modules\\typescript\\lib"
 }
